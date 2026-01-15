@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <cstddef>
 
 struct ImageChunk {
     int id;
@@ -20,7 +21,6 @@ struct ImageChunk {
             data[i] = 255 - data[i];
         }
     }
-    
     
     size_t size() const { return data.size(); }
 };

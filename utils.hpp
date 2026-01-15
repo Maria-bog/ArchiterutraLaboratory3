@@ -4,7 +4,10 @@
 #include <memory>
 #include <fstream>
 #include <iostream>
-
+#include <string>
+#include <cstdint>
+#include <algorithm>
+#include <stdexcept>
 
 #pragma pack(push, 1)
 struct BMPHeader {
@@ -27,7 +30,25 @@ struct BMPHeader {
 };
 #pragma pack(pop)
 
-std::vector<std::unique_ptr<ImageChunk>> load_and_split_image(
+
+inline BMPHeader get_bmp_header(const std::string& filename) {
+    std::ifstream file(filename, std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("Cannot open file: " + filename);
+    }
+    
+    BMPHeader header;
+    file.read(reinterpret_cast<char*>(&header), sizeof(BMPHeader));
+    
+    if (header.signature != 0x4D42) { 
+        throw std::runtime_error("Not a BMP file");
+    }
+    
+    return header;
+}
+
+
+inline std::vector<std::unique_ptr<ImageChunk>> load_and_split_image(
     const std::string& filename, 
     int chunk_width, 
     int chunk_height) {
@@ -40,7 +61,7 @@ std::vector<std::unique_ptr<ImageChunk>> load_and_split_image(
     BMPHeader header;
     file.read(reinterpret_cast<char*>(&header), sizeof(BMPHeader));
     
-    if (header.signature != 0x4D42) { // 'BM'
+    if (header.signature != 0x4D42) { 
         throw std::runtime_error("Not a BMP file");
     }
     
@@ -52,7 +73,8 @@ std::vector<std::unique_ptr<ImageChunk>> load_and_split_image(
     
     int width = header.width;
     int height = header.height;
-    int channels = 3; // RGB
+    int channels = 3; 
+    
     
     int row_padding = (4 - (width * channels) % 4) % 4;
     
@@ -97,7 +119,8 @@ std::vector<std::unique_ptr<ImageChunk>> load_and_split_image(
     return chunks;
 }
 
-void save_image_from_chunks(
+
+inline void save_image_from_chunks(
     const std::string& filename,
     const std::vector<std::unique_ptr<ImageChunk>>& chunks,
     int total_width,
@@ -106,8 +129,10 @@ void save_image_from_chunks(
     int channels = 3;
     std::vector<unsigned char> image_data(total_width * total_height * channels, 0);
     
-   
+    
     for (const auto& chunk : chunks) {
+        if (!chunk) continue;
+        
         for (int y = 0; y < chunk->height; ++y) {
             for (int x = 0; x < chunk->width; ++x) {
                 for (int c = 0; c < channels; ++c) {
