@@ -5,12 +5,11 @@
 #include <chrono>
 
 template<typename T>
-void BlockingQueue<T>::push(T&& item){
+void BlockingQueue<T>::push(T item){
     {
         std::lock_guard<std::mutex> lock(m);
         if(stopped) return;
         q.push(std::move(item));
-        std::cout << "Элемент добавлен в блокирующую очередь" << std::endl;
     }
     cv.notify_one();
 }
@@ -37,9 +36,7 @@ std::optional<T> BlockingQueue<T>::pop(){
     T item = std::move(q.front());
     q.pop();
     return item;
-
 }
-
 
 template<typename T>
 bool BlockingQueue<T>::empty() const {
@@ -52,6 +49,5 @@ size_t BlockingQueue<T>::size() const {
     std::lock_guard<std::mutex> lock(m);
     return q.size();
 }
-
 
 #endif

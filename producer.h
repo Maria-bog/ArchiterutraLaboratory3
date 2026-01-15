@@ -6,6 +6,7 @@
 #include "utils.hpp" 
 #include <iostream>
 #include <memory>
+#include <string>
 
 class Producer{
     private:
@@ -16,6 +17,8 @@ class Producer{
         void produceFile(const std::string& filename, int width, int height){
             try{
                 auto chunks = load_and_split_image(filename, width, height);
+                std::cout << "Producer: создано " << chunks.size() << " задач" << std::endl;
+                
                 for (auto& chunk : chunks) {
                     auto task = std::make_shared<ImageTask>(std::move(chunk));
                     task_queue.push(task);
@@ -29,7 +32,6 @@ class Producer{
         void stop_queue() {
             task_queue.stop();
         }
-
 
 };
 
