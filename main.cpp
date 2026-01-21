@@ -30,14 +30,14 @@ int main(int argc, char* argv[]) {
         
         BMPHeader header = get_bmp_header(input_file);
         
-        std::cout << "==========================================" << std::endl;
-        std::cout << "Starting parallel image processing" << std::endl;
-        std::cout << "Input image: " << input_file << std::endl;
-        std::cout << "Output image: " << output_file << std::endl;
-        std::cout << "Image size: " << header.width << "x" << header.height << std::endl;
-        std::cout << "Chunk size: " << chunk_width << "x" << chunk_height << std::endl;
-        std::cout << "Number of consumers: " << num_consumers << std::endl;
-        std::cout << "==========================================" << std::endl;
+        
+        
+        std::cout << "Исходное изображение: " << input_file << std::endl;
+        std::cout << "Итоговое изображение: " << output_file << std::endl;
+        std::cout << "Разрешение изображения: " << header.width << "x" << header.height << std::endl;
+        std::cout << "Размер сегмента:: " << chunk_width << "x" << chunk_height << std::endl;
+        std::cout << "Число рабочих потоков: " << num_consumers << std::endl;
+        
         
         BlockingQueue<TaskPtr> task_queue;
         
@@ -72,8 +72,8 @@ int main(int argc, char* argv[]) {
             end_time - start_time);
         
         std::cout << "\nВсе задачи обработаны" << std::endl;
-        std::cout << "Обработано чанков: " << processed_counter << std::endl;
-        std::cout << "Собираем результаты..." << std::endl;
+        std::cout << "Обработано блоков: " << processed_counter << std::endl;
+        std::cout << "Собираем результаты" << std::endl;
         
         if (results_storage.empty()) {
             std::cerr << "Error: No results collected!" << std::endl;
@@ -88,14 +88,14 @@ int main(int argc, char* argv[]) {
         std::cout << "Saving processed image: " << output_file << std::endl;
         save_image_from_chunks(output_file, results_storage, header.width, header.height);
         
-        std::cout << "\n==========================================" << std::endl;
-        std::cout << "Processing completed successfully!" << std::endl;
-        std::cout << "Total time: " << duration.count() << " ms" << std::endl;
-        std::cout << "Total chunks processed: " << processed_counter.load() << std::endl;
-        std::cout << "Average time per chunk: "
+        std::cout << "\n" << std::endl;
+        std::cout << "Обработка завершена" << std::endl;
+        std::cout << "Итоговое время: " << duration.count() << " ms" << std::endl;
+        std::cout << "Всего обработано блоков: " << processed_counter.load() << std::endl;
+        std::cout << "Среднее время на блок: "
                   << (processed_counter.load() > 0 ? duration.count() / processed_counter.load() : 0)
                   << " ms" << std::endl;
-        std::cout << "==========================================" << std::endl;
+        
         
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
